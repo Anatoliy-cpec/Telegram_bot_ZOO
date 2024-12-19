@@ -37,8 +37,10 @@ async def quiz_handler(message: Message):
             quiz.calculate_result()
             _result = quiz.get_result()
 
+            await message.answer('start')
             await set_quiz_option(user_id=message.from_user.id, option='animal', animal=_result.name)
-
+            await message.answer('end')
+            
             builder1 = InlineKeyboardBuilder()
             builder2 = InlineKeyboardBuilder()
             await message.answer_photo(URLInputFile(_result.photo_path))

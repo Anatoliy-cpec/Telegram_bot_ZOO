@@ -7,6 +7,7 @@ from aiogram import Router
 
 
 from extensions import *
+from database import get_quiz_questions
 from constants import LOGO_PHOTO
 
 
@@ -26,6 +27,9 @@ async def cmd_start(message: Message):
 @router.message(Command("quiz"))
 async def cmd_start_quiz(message: Message):
     quiz.start_quiz()
+    await message.answer(text='start')
+    quiz.questions = await get_quiz_questions()
+    await message.answer(text='end')
     kb = [
         [types.KeyboardButton(text="Да")],
         [types.KeyboardButton(text="Нет")]

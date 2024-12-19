@@ -26,5 +26,7 @@ async def data_handler(callback: types.CallbackQuery):
         else:
             raise UnComplited
     except Exception as e:
-        await callback.message.answer(str(e))
+        await callback.answer(f'Ошибка: {str(e)}')
+        
+    
 

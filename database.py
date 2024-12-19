@@ -1,6 +1,10 @@
 import os
 import ydb
 
+import logging
+
+import json
+
 from constants import QUIZ_FIELDS
 
 YDB_ENDPOINT = os.getenv("YDB_ENDPOINT")
@@ -39,6 +43,7 @@ def execute_update_query(pool, query, **kwargs):
 # https://ydb.tech/en/docs/reference/ydb-sdk/example/python/#param-prepared-queries
 def execute_select_query(pool, query, **kwargs):
     def callee(session):
+        logging.info("Executing query: %s", query)
         prepared_query = session.prepare(query)
         result_sets = session.transaction(ydb.SerializableReadWrite()).execute(
             prepared_query, _format_kwargs(kwargs), commit_tx=True
@@ -49,14 +54,17 @@ def execute_select_query(pool, query, **kwargs):
 
 
 async def get_quiz_questions():
-    query = 'SELECT question FROM quiz_questions',
+
+    query = 'SELECT question FROM quiz_questions'
 
     result = execute_select_query(
         pool,
         query,
     )
 
-    return result 
+    questions = [row[0] for row in result]
+
+    return questions
 
 
 async def set_quiz_option(user_id, option, **kwargs):
@@ -66,16 +74,16 @@ async def set_quiz_option(user_id, option, **kwargs):
 
     if option == 'feedback':
 
-        feed = kwargs.get('feed')
+        feedback = kwargs.get('feedback').encode('utf-8')
         stars = int(kwargs.get('stars'))
 
         query = f'''
         DECLARE $user_id AS Uint64;
         DECLARE $stars AS Int16;
-        DECLARE $feed AS String;
+        DECLARE $feedback AS String;
 
-        UPSERT INTO `quiz_state` (`user_id`, `feed`, `stars`)
-        VALUES ($user_id, $feed, $stars);
+        UPSERT INTO `quiz_state` (`user_id`, `feedback`, `stars`)
+        VALUES ($user_id, $feedback, $stars);
         '''
 
         execute_update_query(
@@ -83,13 +91,13 @@ async def set_quiz_option(user_id, option, **kwargs):
             query,
             user_id=user_id,
             stars=stars,
-            feedback=feed,
+            feedback=feedback,
         )
 
 
     elif option == 'animal':
 
-        animal = kwargs.get('animal')
+        animal = kwargs.get('animal').encode('utf-8')
 
         query = f'''
         DECLARE $user_id AS Uint64;
@@ -113,7 +121,7 @@ async def get_quiz_option(user_id, field):
 
     if field not in QUIZ_FIELDS: return 'Invalid field'
     else:
-        query = f'SELECT $field FROM quiz_state WHERE user_id = $user_id',
+        query = f'SELECT $field FROM quiz_state WHERE user_id = $user_id'
 
         result = execute_select_query(
             pool,
@@ -122,7 +130,7 @@ async def get_quiz_option(user_id, field):
             field=field,
         )
 
-        return result
+        return json.loads(result)
 
 # Зададим настройки базы данных 
 pool = get_ydb_pool(YDB_ENDPOINT, YDB_DATABASE)

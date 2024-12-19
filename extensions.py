@@ -1,16 +1,4 @@
 
-    # //////////ОПИСАНИЕ//////////
-
-    # CONSTANT_USER_ID - айди юзера которому будет отправлено сообщение если пользователь захочет
-    #                 узнать больше о программе опеки
-    # TOKEN - токен бота тг
-    # AVAILABLE_STARS - массив доступных оценок
-    # questions- массив вопросов задаваемых в ходе викторины
-    # animals - массив животных которые выведутся в результате
-    # quiz - экцемпляр квиза из которого бот берет нужные методы и данные
-
-    # Database() - сласс базы данных, я использовал Mongo тк только с ней не возникло проблем
-
 import os
 from typing import Any
 
@@ -50,12 +38,12 @@ class Socials():
     
     # метод фидбека
     @staticmethod
-    async def feedback(feedback: dict, user_id):
+    async def feedback_data(data: dict, user_id):
 
-        stars = feedback['stars_count']
-        feed = feedback['feedback_text']
+        stars = data['stars']
+        feedback = data['feedback']
 
-        set_quiz_option(user_id=user_id, option='feedback', stars=stars, feed=feed)
+        await set_quiz_option(user_id=user_id, option='feedback', stars=stars, feedback=feedback)
         
 
     
@@ -94,9 +82,7 @@ class Quiz():
     def set_animals(self, animals: list[Animal]):
         self.animals = animals
 
-    async def start_quiz(self):
-
-        self.questions = await  get_quiz_questions()
+    def start_quiz(self):
         self.question_counter = 0
         self.quiz_is_active = True
         self.quiz_complited = False
