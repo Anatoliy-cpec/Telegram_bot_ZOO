@@ -1,6 +1,11 @@
 Бот telegram на основе aiogram и yandex.cloud serverless.
 Бот работает с переменными окружения в консоли яндекс клауд.
 
+справка:
+
+https://ydb.tech/docs/ru/ - Документация YDB
+https://yandex.cloud/ru/docs/storage/ - Yandex Object Storage
+
 CONSTANT_USER_ID - айди пользователя в тг, ему будет отсылаться результат квиза и никнейм пользователя.
 YDB_ENDPOINT, YDB_DATABASE - данные консоли яндекса, нужны для подключения к базе данных
 API_TOKEN - токен вашего бота, тот который выдает BotFather
