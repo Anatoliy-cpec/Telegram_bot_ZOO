@@ -13,10 +13,10 @@ import my_commands, state_handlers, text_handlers, callback_handlers
 
 async def main():
     # логи в файл
-    log_path = 'Telegram_bot/tg_bot_2/files/log.log'
+    log_path = './files/log.log'
     logging.basicConfig(level=logging.INFO, filename=log_path, filemode="a", format="%(asctime)s %(levelname)s %(message)s")
 
-    bot = Bot(os.environ.get('TOKEN'))
+    bot = Bot(os.environ.get('API_TOKEN'))
     dp = Dispatcher()
     # подключаю антиспам
     dp.message.middleware(ThrotlingMiddleware())
