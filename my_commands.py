@@ -7,10 +7,8 @@ from aiogram import Router
 
 
 from extensions import *
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+from database import get_quiz_questions
+from constants import LOGO_PHOTO
 
 
 router = Router()
@@ -22,14 +20,16 @@ async def cmd_start(message: Message):
                 text="Еще бы!",
                 callback_data="start_quiz")
                 )
-    photo = FSInputFile('Telegram_bot/tg_bot_2/images/intro_logo.jpg')
-    await message.answer_photo(photo, reply_markup=types.ReplyKeyboardRemove())
+    await message.answer_photo(LOGO_PHOTO, reply_markup=types.ReplyKeyboardRemove())
     await message.answer('Добро пожаловать в наш телеграм канал, тут тебя ждет увлекательная викторина в которой ты сможешь узнать свое тотемное животное! ')
     await message.answer(text='Начать прямо сейчас!', reply_markup=builder.as_markup())
 
 @router.message(Command("quiz"))
 async def cmd_start_quiz(message: Message):
     quiz.start_quiz()
+    await message.answer(text='start')
+    quiz.questions = await get_quiz_questions()
+    await message.answer(text='end')
     kb = [
         [types.KeyboardButton(text="Да")],
         [types.KeyboardButton(text="Нет")]

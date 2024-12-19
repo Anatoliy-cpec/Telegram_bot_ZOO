@@ -1,35 +1,12 @@
 
-    # //////////ОПИСАНИЕ//////////
-
-    # CONSTANT_USER_ID - айди юзера которому будет отправлено сообщение если пользователь захочет
-    #                 узнать больше о программе опеки
-    # TOKEN - токен бота тг
-    # AVAILABLE_STARS - массив доступных оценок
-    # questions- массив вопросов задаваемых в ходе викторины
-    # animals - массив животных которые выведутся в результате
-    # quiz - экцемпляр квиза из которого бот берет нужные методы и данные
-
-    # Database() - сласс базы данных, я использовал Mongo тк только с ней не возникло проблем
-
-
-
-
-import requests
-import json
 import os
 from typing import Any
-from dotenv import load_dotenv
 
-from send_feedback import Database
+from  database import get_quiz_questions, set_quiz_option
 
-# подгружаю виртуальное окружение 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(dotenv_path):
-    load_dotenv(dotenv_path)
+# подгружаю из виртуального окружения свой id, он нужен для отправки сообщения в личку
 
-# подгружаю из виртуального окружения свой id, он нужен для отправки сообщения в личку 
-CONSTANT_USER_ID = os.environ.get('CONSTANT_USER_ID')
-AVAILABLE_STARS = ['1','2','3','4','5','6','7','8','9','10']
+
 
 # создаю свои исключения
 class MyException(Exception):
@@ -61,20 +38,13 @@ class Socials():
     
     # метод фидбека
     @staticmethod
-    def feedback(feedback: dict):
-        # если соединение с базой прошло успешно то добавляем отзыв
-        # оно будет успешно только если ip разрешен в базе
-        try:
-            __db = Database()
-            if __db.client is None:
-                raise ServerTimeout
-            else:
-                __db.connect_to_DB()
-        except Exception as e:
-            with open('Telegram_bot/tg_bot_2/files/log.log', 'a', encoding='utf-8') as file:
-                    file.write(str(e))
-        else:
-            __db.send_to_DB(feedback)
+    async def feedback_data(data: dict, user_id):
+
+        stars = data['stars']
+        feedback = data['feedback']
+
+        await set_quiz_option(user_id=user_id, option='feedback', stars=stars, feedback=feedback)
+        
 
     
 
@@ -107,10 +77,6 @@ class Quiz():
         self.quiz_complited: bool = False
         self.feedback_is_active: bool = False
         self.quiz_result: 'Animal' = Any
-    
-    def set_questions(self, questions: list[str]):
-        self.questions = questions
-        
     
     
     def set_animals(self, animals: list[Animal]):
@@ -203,16 +169,6 @@ take_care: str = '''Стать опекуном
 Опека — это прекрасная возможность принять участие в деле сохранения редких видов, помочь нам в реализации природоохранных программ.
 '''
 
-# для простоты записал эти данные в переменные, а вобще нужно подгружать их из mongo
-
-questions: list[str] = [
-    'Вы наверно белый и очень пушистый?',
-    'Вы больше любите находиться в стае?',
-    'С вашей шерстью холода вам нипочём?',
-    'Вы любите овощи?',
-    'Вы любите цитаты Стетхема?',
-]
-
 animals: list['Animal'] = [
     Animal('Заяц беляк',
             'http://petnaobed.ru/wp-content/uploads/2020/12/575d36825dada.jpeg',
@@ -230,8 +186,4 @@ animals: list['Animal'] = [
 ]
 
 quiz = Quiz()
-quiz.set_questions(questions)
 quiz.set_animals(animals)
-
-if __name__ == "__main__":
-    print('/////////////////////////-------//////////////////////')

@@ -1,10 +1,8 @@
-from aiogram import Bot, types
-from aiogram.fsm.context import FSMContext
+from aiogram import types
 from aiogram import Router, F
 
 from extensions import *
 from my_commands import *
-from state_handlers import cmd_feedback, FSMContext
 
 router = Router()
 
@@ -28,5 +26,7 @@ async def data_handler(callback: types.CallbackQuery):
         else:
             raise UnComplited
     except Exception as e:
-        await callback.message.answer(str(e))
+        await callback.answer(f'Ошибка: {str(e)}')
+        
+    
 

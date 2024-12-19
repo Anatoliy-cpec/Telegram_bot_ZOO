@@ -7,6 +7,7 @@ from aiogram import Router, F
 
 from extensions import *
 from my_commands import cmd_share
+from database import set_quiz_option, get_quiz_option
 
 router = Router()
 
@@ -35,6 +36,11 @@ async def quiz_handler(message: Message):
             await message.answer_sticker('CAACAgIAAxkBAAEDbotlybW4b8GWJnAbWjlhY4NcRkMdOgAC_wAD9wLIDz7Q9EOOrMfoNAQ')
             quiz.calculate_result()
             _result = quiz.get_result()
+
+            await message.answer('start')
+            await set_quiz_option(user_id=message.from_user.id, option='animal', animal=_result.name)
+            await message.answer('end')
+            
             builder1 = InlineKeyboardBuilder()
             builder2 = InlineKeyboardBuilder()
             await message.answer_photo(URLInputFile(_result.photo_path))

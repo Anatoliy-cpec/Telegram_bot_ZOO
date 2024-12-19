@@ -5,6 +5,7 @@ from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 
 from extensions import *
+from constants import AVAILABLE_STARS
 
 router = Router()  # [1]
 
@@ -38,13 +39,15 @@ async def stars_chosen_incorrectly(message: Message):
 
 @router.message(Feedback.feedback_text, F.text)
 async def feedback_complited(message: Message, state: FSMContext):
-    quiz.feedback_is_active = True
+    quiz.feedback_is_active = False
+    await state.update_data(feedback=message.text.lower())
+    user_data = await state.get_data()
+    user_id = message.from_user.id
+    await Socials.feedback_data(user_data, user_id)
     await message.answer(
         'Благодарим вас за ваш отзыв, ваше мнение очень важно для нас!'
     )
-    await state.update_data(feedback=message.text.lower())
-    user_data = await state.get_data()
-    Socials.feedback(user_data)
     await state.clear()
+
 
                 
